@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # update 20 mai 2013
 # storeurl dari tempat sampah google code
-
+# perubahan
 $|=1;
 while (<>) {
     @X = split;
