@@ -1,11 +1,13 @@
 #!/usr/bin/perl
-# update 20 mai 2013
-# storeurl dari tempat sampah google code
-# perubahan
+# update 19 oktober 2013
+# for ALL Youtube ( range & non range ) + 4shared
+# storeurl dari tempat sampah
+# send link from youtube contain >> (ptracking|stream_204|player_204|gen_204) to storeurl
+
 $|=1;
 while (<>) {
     @X = split;
-        $x = $X[0] . " ";
+       $x = $X[0] . " ";
        $_ = $X[1];
        $u = $X[1];
 
@@ -56,16 +58,48 @@ if (m/^http\:\/\/.*(profile|photo).*\.ak\.fbcdn\.net(\/h(profile|photos)-ak-)(sn
         #maps.google.com
 } elsif (m/^http:\/\/(khm|mt)[0-9]?(.google.com.*)/) {
         print $x . "http://" . $1  . $2 . "\n";
-        
+        #4shared
+}elsif (m/^http:\/\/[a-zA-Z]{2}\d*\.4shared\.com(:8080|)\/download\/(.*)\/(.*\..*)\?.*/) {
+print $x . "http://www.4shared.com.SQUIDINTERNAL/download/$2\/$3\n";
+ 
+        #4shared preview
+}elsif (m/^http:\/\/[a-zA-Z]{2}\d*\.4shared\.com(:8080|)\/img\/(\d*)\/\w*\/dlink__2Fdownload_2F(\w*)_3Ftsid_3D[\w-]*\/preview\.mp3\?sId=\w*/) {
+print $x . "http://www.4shared.com.SQUIDINTERNAL/$2\n";
+    
+#####  crontab untuk menghapus file yg sudah tidak terpakai lebih dari 1 jam yang lalu
+####  Crontab perbaikan dari warnet ersa pati ( pak lutfi )
+### 0 * * * * find /var/log/squid/ -maxdepth 1 ! -name "access.*" -type f -mmin +60 -delete >> /dev/null 2>&1
+
+} elsif ($X[1] =~ m/^http(|s)\:\/\/.*youtube.*(ptracking|stream_204|player_204|gen_204).*(video_id|docid|v)\=([^\&\s]*).*/){
+        $vid = $4 ;
+        @cpn = m/[&?]cpn\=([^\&\s]*)/;
+		$fn = "/var/log/squid/@cpn";
+		unless (-e $fn) {
+			open FH,">".$fn ;
+			print FH "$vid\n";
+			close FH;
+		} 
+        print $x . $X[1] . "\n";
+
 } elsif ($X[1] =~ m/^http\:\/\/.*(youtube|google).*videoplayback.*/){
         @itag = m/[&?](itag=[0-9]*)/;
-        @CPN = m/[&?]cpn\=([a-zA-Z0-9\-\_]*)/;
-        @IDS = m/[&?]id\=([a-zA-Z0-9\-\_]*)/;
-        $id = &GetID($CPN[0], $IDS[0]);
+        @ids = m/[&?]id\=([^\&\s]*)/;
+        @mime = m/[&?](mime\=[^\&\s]*)/;
+        @cpn = m/[&?]cpn\=([^\&\s]*)/;
+		$fn = "/var/log/squid/@cpn";
+		if (-e $fn) {
+			open FH,"<".$fn ;
+			$id  = <FH>;
+			chomp $id ;
+			close FH ;
+	    } else {
+			$id = $ids[0] ;
+		} 
         @range = m/[&?](range=[^\&\s]*)/;
-        print $x . "http://video-srv.youtube.com.SQUIDINTERNAL/id=" . $id . "&@itag@range\n";
-
-        #Google
+        print $x . "http://video-srv.youtube.com.SQUIDINTERNAL/id=" . $id . "&@itag@range@mime\n";
+        
+        
+                        #Google
 } elsif (m/^http:\/\/www\.google-analytics\.com\/__utm\.gif\?.*/) {
         print $x . "http://www.google-analytics.com/__utm.gif\n";
 
@@ -159,10 +193,10 @@ if (m/^http\:\/\/.*(profile|photo).*\.ak\.fbcdn\.net(\/h(profile|photos)-ak-)(sn
         print $x . "http://squid-cdn-url/" . $2  . "." . $3 . "\n";
 
                         # spicific extention
-# } elsif (m/^http:\/\/(.*?)\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico|flv|wmv|3gp|mp(4|3)|exe|msi|zip|on2|mar|swf).*?/) {
-        # @y = ($1,$2);
-        # $y[0] =~ s/((cache|cdn)[-\d]*)|([a-zA-A]+-?[0-9]+(-[a-zA-Z]*)?)/cdn/;
-        # print $x . "http://" . $y[0] . "." . $y[1] . "\n";
+} elsif (m/^http:\/\/(.*?)\.(jp(e?g|e|2)|gif|png|tiff?|bmp|ico|flv|wmv|3gp|mp(4|3)|exe|msi|zip|on2|mar|swf).*?/) {
+        @y = ($1,$2);
+         $y[0] =~ s/((cache|cdn)[-\d]*)|([a-zA-A]+-?[0-9]+(-[a-zA-Z]*)?)/cdn/;
+         print $x . "http://" . $y[0] . "." . $y[1] . "\n";
 
                         #generic http://variable.domain.com/path/filename."ex", "ext" or "exte"
                         #http://cdn1-28.projectplaylist.com
@@ -181,32 +215,3 @@ if (m/^http\:\/\/.*(profile|photo).*\.ak\.fbcdn\.net(\/h(profile|photos)-ak-)(sn
 }
 }
 
-
-sub GetID
-{
-$id = "";
-use File::ReadBackwards;
-my $lim = 200 ;
-my $ref_log = File::ReadBackwards->new('/var/log/squid/yt.log');
-while (defined($line = $ref_log->readline))
-{
-if ($line =~ m/.*youtube.*\/watch\?.*v=([a-zA-Z0-9\-\_]*).*\s.*id=$IDS[0].*/){
-$id = $1;
-last;
-}
-if ($line =~ m/.*youtube.*\/.*cpn=$CPN[0].*[&](video_id|docid|v)=([a-zA-Z0-9\-\_]*).*/){
-$id = $2;
-last;
-}
-if ($line =~ m/.*youtube.*\/.*[&?](video_id|docid|v)=([a-zA-Z0-9\-\_]*).*cpn=$CPN[0].*/){
-$id = $2;
-last;
-}
-last if --$lim <= 0;
-}
-if ($id eq ""){
-$id = $IDS[0];
-} 
-$ref_log->close();
-return $id;
-}
