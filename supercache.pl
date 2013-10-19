@@ -67,7 +67,6 @@ print $x . "http://www.4shared.com.SQUIDINTERNAL/download/$2\/$3\n";
 print $x . "http://www.4shared.com.SQUIDINTERNAL/$2\n";
     
 #####  crontab untuk menghapus file yg sudah tidak terpakai lebih dari 1 jam yang lalu
-####  Crontab perbaikan dari warnet ersa pati ( pak lutfi )
 ### 0 * * * * find /var/log/squid/ -maxdepth 1 ! -name "access.*" -type f -mmin +60 -delete >> /dev/null 2>&1
 
 } elsif ($X[1] =~ m/^http(|s)\:\/\/.*youtube.*(ptracking|stream_204|player_204|gen_204).*(video_id|docid|v)\=([^\&\s]*).*/){
