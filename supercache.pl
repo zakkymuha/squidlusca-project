@@ -73,8 +73,8 @@ print $x . "http://www.4shared.com.SQUIDINTERNAL/download/$2\/$3\n";
 }elsif (m/^http:\/\/[a-zA-Z]{2}\d*\.4shared\.com(:8080|)\/img\/(\d*)\/\w*\/dlink__2Fdownload_2F(\w*)_3Ftsid_3D[\w-]*\/preview\.mp3\?sId=\w*/) {
 print $x . "http://www.4shared.com.SQUIDINTERNAL/$2\n";
 
- #4shared audio/video preview
-} elsif (($u =~ /4shared/) && (m/^http:\/\/(.*?)\.(.*?)\/(.*?)\/(dlink__2Fdownload_2F([^\/-]+))([a-zA-Z0-9-]+)\/([^\/\?\&]*\.[^\/\?\&]{2,3})(\?.*)?$/)) {
+        #4shared audio/video preview
+}elsif (($u =~ /4shared/) && (m/^http:\/\/(.*?)\.(.*?)\/(.*?)\/(dlink__2Fdownload_2F([^\/-]+))([a-zA-Z0-9-]+)\/([^\/\?\&]*\.[^\/\?\&]{2,3})(\?.*)?$/)) {
 @y = ($1,$2,$3,$4,$7);
 $y[0] =~ s/[a-z]+([0-9]+)?/cdn./;
 print $x . "http://" . $y[0] . $y[1] . "/" . $y[2] . "/" . $y[3] . "/" . $y[4] . "\n";
