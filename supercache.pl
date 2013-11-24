@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# update 19 oktober 2013
+# update 24 November 2013
 # for ALL Youtube ( range & non range ) + 4shared
 # storeurl dari tempat sampah
 # send link from youtube contain >> (ptracking|stream_204|player_204|gen_204) to storeurl
@@ -14,6 +14,13 @@ while (<>) {
         #facebook
 if (m/^http\:\/\/.*(profile|photo).*\.ak\.fbcdn\.net(\/h(profile|photos)-ak-)(snc|ash|prn)[0-9]?(.*)/) {
         print $x . "http://facebook.SQUIDINTERNAL" . $2  . "fb" .  $5  . "\n";
+        
+        # FACEBOOK VIDEO
+} elsif (m/^http:\/\/(video\.ak\.fbcdn\.net)\/(.*?)\/(.*\.mp4)\??.*$/) {
+print $x . "http://" . $1 . "/" . $3 . "";
+} elsif (m/^http:\/\/video\.(.*)\.fbcdn\.net\/(.*?)\/([0-9_]+\.(mp4|flv|avi|mkv|m4v|mov|wmv|3gp|mpg|mpeg)?)(.*)/) {
+print $x . "http://video.ak.fbcdn.net/" . $3 . "";
+
 
         #Speedtest
 } elsif (m/^http\:\/\/.*\/speedtest\/(.*)\?.*/) {
@@ -65,6 +72,12 @@ print $x . "http://www.4shared.com.SQUIDINTERNAL/download/$2\/$3\n";
         #4shared preview
 }elsif (m/^http:\/\/[a-zA-Z]{2}\d*\.4shared\.com(:8080|)\/img\/(\d*)\/\w*\/dlink__2Fdownload_2F(\w*)_3Ftsid_3D[\w-]*\/preview\.mp3\?sId=\w*/) {
 print $x . "http://www.4shared.com.SQUIDINTERNAL/$2\n";
+
+ #4shared audio/video preview
+} elsif (($u =~ /4shared/) && (m/^http:\/\/(.*?)\.(.*?)\/(.*?)\/(dlink__2Fdownload_2F([^\/-]+))([a-zA-Z0-9-]+)\/([^\/\?\&]*\.[^\/\?\&]{2,3})(\?.*)?$/)) {
+@y = ($1,$2,$3,$4,$7);
+$y[0] =~ s/[a-z]+([0-9]+)?/cdn./;
+print $x . "http://" . $y[0] . $y[1] . "/" . $y[2] . "/" . $y[3] . "/" . $y[4] . "\n";
     
 #####  crontab untuk menghapus file yg sudah tidak terpakai lebih dari 1 jam yang lalu
 ### 0 * * * * find /var/log/squid/ -maxdepth 1 ! -name "access.*" -type f -mmin +60 -delete >> /dev/null 2>&1
