@@ -1,0 +1,1 @@
+disini berisi kumpulan scrip squidlusca hasil konfigurasi dan coba sana coba sini hehehehe
